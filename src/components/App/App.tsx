@@ -7,11 +7,13 @@ import fetchMovies from '../../services/movieService';
 import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import Loader from '../Loader/Loader';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
 function App() {
   const [movieQuery, setMovieQuery] = useState('');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -19,6 +21,7 @@ function App() {
 
       try {
         setIsLoading(true);
+        setIsError(false);
 
         const movieList = await fetchMovies(movieQuery);
 
@@ -28,8 +31,8 @@ function App() {
         }
 
         setMovies(movieList);
-      } catch (error) {
-        console.log(error);
+      } catch {
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
@@ -48,6 +51,7 @@ function App() {
     <div>
       <SearchBar onSubmit={setMovieQuery} />
       {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
       {movies && <MovieGrid onSelect={handleMovieCardClick} movies={movies} />}
 
       <Toaster position="top-center" reverseOrder={false} />
