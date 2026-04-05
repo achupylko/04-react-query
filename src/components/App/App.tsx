@@ -1,8 +1,11 @@
 import { toast, Toaster } from 'react-hot-toast';
-import SearchBar from '../SearchBar/SearchBar';
 import { useEffect, useState } from 'react';
-import fetchMovies from '../../services/movieService';
+
 import type { Movie } from '../../types/movie';
+
+import fetchMovies from '../../services/movieService';
+import SearchBar from '../SearchBar/SearchBar';
+import MovieGrid from '../MovieGrid/MovieGrid';
 
 function App() {
   const [movieQuery, setMovieQuery] = useState('');
@@ -31,11 +34,16 @@ function App() {
     }
   }, [movieQuery]);
 
-  console.log(movies);
+  const handleMovieCardClick = (movie: Movie) => {
+    console.log(movie);
+  };
 
   return (
     <div>
       <SearchBar onSubmit={setMovieQuery} />
+
+      {movies && <MovieGrid onSelect={handleMovieCardClick} movies={movies} />}
+
       <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
