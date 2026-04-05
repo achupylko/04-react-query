@@ -8,12 +8,15 @@ import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import MovieModal from '../MovieModal/MovieModal';
 
 function App() {
   const [movieQuery, setMovieQuery] = useState('');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -43,8 +46,14 @@ function App() {
     }
   }, [movieQuery]);
 
-  const handleMovieCardClick = (movie: Movie) => {
-    console.log(movie);
+  const openModal = (movie: Movie) => {
+    setIsModalOpen(true);
+    setSelectedMovie(movie);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovie(null);
   };
 
   return (
@@ -52,8 +61,10 @@ function App() {
       <SearchBar onSubmit={setMovieQuery} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {movies && <MovieGrid onSelect={handleMovieCardClick} movies={movies} />}
-
+      {movies && <MovieGrid onSelect={openModal} movies={movies} />}
+      {selectedMovie && isModalOpen && (
+        <MovieModal movie={selectedMovie} onClose={closeModal} />
+      )}
       <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
