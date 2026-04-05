@@ -11,27 +11,39 @@ import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 
+import ReactPaginateModule from 'react-paginate';
+import type { ReactPaginateProps } from 'react-paginate';
+import type { ComponentType } from 'react';
+
+import css from './App.module.css';
+
+type ModuleWithDefault<T> = { default: T };
+const ReactPaginate = (
+  ReactPaginateModule as unknown as ModuleWithDefault<
+    ComponentType<ReactPaginateProps>
+  >
+).default;
+
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const {
-    data: movies,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['movies', searchQuery],
-    queryFn: () => fetchMovies(searchQuery, 1),
+  const { data, isLoading, isSuccess, isError } = useQuery({
+    queryKey: ['movies', searchQuery, currentPage],
+    queryFn: () => fetchMovies(searchQuery, currentPage),
     enabled: searchQuery !== '',
     placeholderData: keepPreviousData,
   });
 
+  const totalPages = data?.total_pages ?? 0;
+
   useEffect(() => {
-    if (movies?.length === 0) {
+    if (isSuccess && data.results.length === 0) {
       toast.error('No movies found for your request.');
     }
-  }, [movies]);
+  }, [isSuccess, data]);
 
   const openModal = (movie: Movie) => {
     setIsModalOpen(true);
@@ -48,7 +60,20 @@ function App() {
       <SearchBar onSubmit={setSearchQuery} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {movies && <MovieGrid onSelect={openModal} movies={movies} />}
+      {isSuccess && totalPages > 1 && (
+        <ReactPaginate
+          pageCount={totalPages}
+          pageRangeDisplayed={5}
+          marginPagesDisplayed={1}
+          onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+          forcePage={currentPage - 1}
+          containerClassName={css.pagination}
+          activeClassName={css.active}
+          nextLabel="→"
+          previousLabel="←"
+        />
+      )}
+      {data && <MovieGrid onSelect={openModal} movies={data.results} />}
       {selectedMovie && isModalOpen && (
         <MovieModal movie={selectedMovie} onClose={closeModal} />
       )}

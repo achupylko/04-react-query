@@ -14,7 +14,7 @@ interface MovieResponse {
 export default async function fetchMovies(
   query: string,
   page: number
-): Promise<Movie[]> {
+): Promise<MovieResponse> {
   const options = {
     method: 'GET',
     headers: {
@@ -31,5 +31,5 @@ export default async function fetchMovies(
 
   const response = await axios.get<MovieResponse>(URL, options);
 
-  return response.data.results;
+  return response.data;
 }
