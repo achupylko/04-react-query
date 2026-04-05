@@ -11,7 +11,10 @@ interface MovieResponse {
   total_results: number;
 }
 
-export default async function fetchMovies(query: string): Promise<Movie[]> {
+export default async function fetchMovies(
+  query: string,
+  page: number
+): Promise<Movie[]> {
   const options = {
     method: 'GET',
     headers: {
@@ -20,6 +23,9 @@ export default async function fetchMovies(query: string): Promise<Movie[]> {
     },
     params: {
       query,
+      include_adult: false,
+      language: 'en-US',
+      page,
     },
   };
 
